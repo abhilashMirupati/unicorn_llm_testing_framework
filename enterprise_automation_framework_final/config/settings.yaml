@@ -1,0 +1,91 @@
+# Configuration file for the automation framework.
+#
+# NOTE: This file is deprecated. The primary configuration is now in
+# the root settings.yaml file. This file is kept for backward compatibility
+# but should not be modified. All new configuration should be added to
+# the root settings.yaml file.
+#
+# This file controls the behaviour of the framework at runtime.  It is
+# loaded by the various components such as the drivers, the LLM
+# integration layer and the dashboard.  Each value here can be
+# overridden via environment variables or a customised settings file.
+---
+# Choose whether to use a local LLM (e.g. Ollama) or a cloud provider.
+llm_mode: "local"  # options: local, cloud
+
+# Name of the model to use.  When llm_mode is local the model must be
+# available via Ollama.  When llm_mode is cloud a supported model name
+# for the selected provider should be supplied.
+model: "gemini"
+
+# API key for cloud LLMs.  If null, the client will attempt to read
+# from the OPENAI_API_KEY environment variable when using a cloud
+# provider.  Local models do not require an API key.
+api_key: null
+
+# Tuning parameters for the LLM agent.  ``llm_retries`` controls how many
+# attempts will be made when invoking a cloud provider before falling
+# back to heuristics.  ``llm_timeout`` sets the maximum number of
+# seconds to wait for a response from the provider.  These values are
+# ignored when ``llm_mode`` is ``local``.
+llm_retries: 2
+llm_timeout: 30
+
+# Enable fallback to visual understanding.  When true the framework
+# captures screenshots and asks the LLM to reason over the image when a
+# traditional selector fails.  This option should be left enabled
+# unless explicitly disabled for performance reasons.
+enable_visual_fallback: true
+
+# Default waiting strategy.  The framework will wait for pages and
+# elements to become available before interacting.  "smart" uses the
+# dynamically learned waits from the waits repository.  "strict"
+# enforces a minimal wait time configured at the test level.
+default_wait: smart
+
+# Enable or disable test case versioning.  When true every change to a
+# test case results in a new version being recorded.  Versioning
+# metadata is surfaced in the dashboard.
+enable_versioning: true
+
+# Paths to various repositories and databases.  These can be
+# overridden via environment variables or alternative config files.
+wait_repo:
+  path: "waits_repo/wait_repo.yaml"
+
+locator_repo:
+  path: "locators_repo/locators.db"
+
+db:
+  path: "data/test_db.sqlite"
+
+# UI settings.  Additional browser types (webkit, firefox) may be
+# specified.  Headless mode is recommended for CI environments.
+ui:
+  browser: "chromium"
+  headless: true
+
+# Mobile settings.  Configure host, port and desired capabilities for
+# Appium.  These values will be passed directly to the Appium
+# WebDriver.
+mobile:
+  host: "localhost"
+  port: 4723
+  desired_capabilities:
+    platformName: "Android"
+    deviceName: "emulator"
+    appPackage: ""
+    appActivity: ""
+
+# API settings.  Base URLs for APIs under test can be specified
+# here.  Test cases may refer to these names instead of hard coding
+# full URLs.
+api:
+  base_urls:
+    default: ""
+
+# Concurrency settings.  Controls the number of threads used when
+# executing test cases in parallel.  Raising this number increases
+# throughput but also CPU/memory usage.
+concurrency:
+  max_workers: 4

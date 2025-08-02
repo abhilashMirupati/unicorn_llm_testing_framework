@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Framework Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #667eea;
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+        .test-case-item {
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        .test-case-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-robot me-2"></i>
+                            Automation Framework
+                        </h4>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/test-cases">
+                                <i class="fas fa-list me-2"></i>
+                                Test Cases
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/executions">
+                                <i class="fas fa-play me-2"></i>
+                                Executions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/reports">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/allure-report" target="_blank">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Allure Report
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                            Total Test Cases
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold" id="total-cases">{{ total_cases }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-list fa-2x text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card success">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                            Total Executions
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold" id="total-runs">{{ total_runs }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-play fa-2x text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card warning">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                            Failed Tests
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold" id="failed-tests">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-exclamation-triangle fa-2x text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card stat-card info">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                            Success Rate
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold" id="success-rate">95%</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-percentage fa-2x text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload Files
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="upload-area" onclick="document.getElementById('excel-file').click()">
+                                            <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+                                            <h6>Upload Excel</h6>
+                                            <p class="text-muted">Upload Excel file with test cases</p>
+                                            <input type="file" id="excel-file" accept=".xlsx,.xls" style="display: none;" onchange="uploadFile('excel', this)">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="upload-area" onclick="document.getElementById('brd-file').click()">
+                                            <i class="fas fa-file-word fa-3x text-primary mb-3"></i>
+                                            <h6>Upload BRD</h6>
+                                            <p class="text-muted">Upload Business Requirements Document</p>
+                                            <input type="file" id="brd-file" accept=".xlsx,.docx,.txt" style="display: none;" onchange="uploadFile('brd', this)">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="upload-area" onclick="document.getElementById('swagger-file').click()">
+                                            <i class="fas fa-code fa-3x text-info mb-3"></i>
+                                            <h6>Upload Swagger</h6>
+                                            <p class="text-muted">Upload Swagger/OpenAPI specification</p>
+                                            <input type="file" id="swagger-file" accept=".json,.yaml,.yml" style="display: none;" onchange="uploadFile('swagger', this)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Test Cases -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Recent Test Cases
+                                </h5>
+                                <a href="/test-cases" class="btn btn-sm btn-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>User Story</th>
+                                                <th>Test Set</th>
+                                                <th>Category</th>
+                                                <th>Priority</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-test-cases">
+                                            {% for case in test_cases[-5:] %}
+                                            <tr class="test-case-item">
+                                                <td>{{ case.id }}</td>
+                                                <td>{{ case.user_story[:50] }}{% if case.user_story|length > 50 %}...{% endif %}</td>
+                                                <td>{{ case.test_set }}</td>
+                                                <td>
+                                                    <span class="badge bg-primary status-badge">{{ case.get('category', 'positive') }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-{% if case.get('priority') == 'high' %}danger{% elif case.get('priority') == 'medium' %}warning{% else %}success{% endif %} status-badge">
+                                                        {{ case.get('priority', 'medium') }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary status-badge">Not Run</span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="viewTestCase({{ case.id }})">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-success" onclick="runTestCase({{ case.id }})">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Executions -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-history me-2"></i>
+                                    Recent Executions
+                                </h5>
+                                <a href="/executions" class="btn btn-sm btn-primary">View All</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Run ID</th>
+                                                <th>Test Case</th>
+                                                <th>Status</th>
+                                                <th>Started</th>
+                                                <th>Duration</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-executions">
+                                            {% for run in recent_runs %}
+                                            <tr>
+                                                <td>{{ run.id }}</td>
+                                                <td>{{ run.get('test_case_id', 'N/A') }}</td>
+                                                <td>
+                                                    <span class="badge bg-{% if run.status == 'passed' %}success{% elif run.status == 'failed' %}danger{% elif run.status == 'partial' %}warning{% else %}secondary{% endif %} status-badge">
+                                                        {{ run.status }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ run.started_at }}</td>
+                                                <td>{{ run.get('duration', 'N/A') }}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="viewExecution({{ run.id }})">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="testCaseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Test Case Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="testCaseModalBody">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global functions
+        function refreshData() {
+            location.reload();
+        }
+
+        function uploadFile(type, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            let url = '';
+            switch(type) {
+                case 'excel':
+                    url = '/api/upload-excel';
+                    break;
+                case 'brd':
+                    url = '/api/upload-brd';
+                    break;
+                case 'swagger':
+                    url = '/api/upload-swagger';
+                    break;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                refreshData();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Upload failed');
+            });
+        }
+
+        function viewTestCase(id) {
+            fetch(`/api/test-cases/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const modal = new bootstrap.Modal(document.getElementById('testCaseModal'));
+                    document.getElementById('testCaseModalBody').innerHTML = `
+                        <h6>User Story</h6>
+                        <p>${data.test_case.user_story}</p>
+                        <h6>Test Set</h6>
+                        <p>${data.test_case.test_set}</p>
+                        <h6>Steps</h6>
+                        <ul>
+                            ${data.test_case.steps.map(step => `<li>${step.action} ${step.target || ''}</li>`).join('')}
+                        </ul>
+                    `;
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load test case');
+                });
+        }
+
+        function runTestCase(id) {
+            fetch('/api/execute-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    test_case_ids: [id],
+                    parallel: false,
+                    timeout: 300
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                refreshData();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start execution');
+            });
+        }
+
+        function viewExecution(id) {
+            // TODO: Implement execution details view
+            alert('Execution details view not implemented yet');
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html> 

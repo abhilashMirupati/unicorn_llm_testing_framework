@@ -1,0 +1,59 @@
+[
+  {
+    "identifier": "TC_ENGLISH_UI_1",
+    "description": "Basic login flow with English descriptions",
+    "type": "ui",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "https://example.com/login"
+      },
+      {
+        "action": "click",
+        "element": "Login"
+      },
+      {
+        "action": "fill",
+        "element": "Username",
+        "value": "john.doe"
+      },
+      {
+        "action": "fill",
+        "element": "Password",
+        "value": "secret123"
+      },
+      {
+        "action": "click",
+        "element": "Submit"
+      },
+      {
+        "action": "assert_text",
+        "element": "Welcome"
+      }
+    ]
+  },
+  {
+    "identifier": "TC_ENGLISH_MOBILE_1",
+    "description": "Mobile search flow with English descriptions",
+    "type": "mobile",
+    "steps": [
+      {
+        "action": "tap",
+        "element": "Search"
+      },
+      {
+        "action": "send_keys",
+        "element": "Search field",
+        "text": "pizza"
+      },
+      {
+        "action": "tap",
+        "element": "Submit"
+      },
+      {
+        "action": "assert_text",
+        "element": "Results"
+      }
+    ]
+  }
+]
