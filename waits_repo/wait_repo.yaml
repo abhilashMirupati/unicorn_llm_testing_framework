@@ -1,0 +1,9 @@
+---
+ui:
+  spinners:
+    - "div.spinner"
+  overlays:
+    - "div.overlay"
+mobile:
+  spinners: []
+  overlays: []

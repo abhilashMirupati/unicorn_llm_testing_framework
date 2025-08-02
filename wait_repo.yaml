@@ -1,0 +1,18 @@
+ui:
+  spinners:
+    # Known CSS selectors or Playwright locators that indicate loading spinners.
+    # Additional selectors can be added dynamically at runtime via wait_utils.add_indicator().
+    - ".spinner"
+    - ".loading"
+    - ".loader"
+  overlays:
+    # Overlay selectors that block interaction (e.g. modal backdrops or masks).
+    - ".modal-backdrop"
+
+mobile:
+  spinners:
+    # Known mobile indicators.  Use Appium locator strings such as XPath or accessibility ID.
+    - "//android.widget.ProgressBar"
+  overlays:
+    # Mobile overlay indicators.
+    - "//android.widget.FrameLayout[@resource-id='android:id/content']"
